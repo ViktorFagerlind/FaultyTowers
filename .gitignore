@@ -1,0 +1,44 @@
+# =============== #
+# Unity generated #
+# =============== #
+Temp/
+Obj/
+UnityGenerated/
+Library/
+GraphicsEditing/
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+Release/
+ExportedObj/
+
+*.dll
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+/Bin
+
+# =============== #
+# Logging #
+# =============== #
+*.log
+MacOsRelease.app
+Scratchpad ML Export
