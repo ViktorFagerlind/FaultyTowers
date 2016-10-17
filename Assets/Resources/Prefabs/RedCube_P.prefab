@@ -23,6 +23,7 @@ GameObject:
   - 23: {fileID: 23000011239797516}
   - 50: {fileID: 50000011703499392}
   - 61: {fileID: 61000011656975976}
+  - 114: {fileID: 114000011513259736}
   m_Layer: 0
   m_Name: RedCube_P
   m_TagString: Untagged
@@ -110,3 +111,14 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
+--- !u!114 &114000011513259736
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012531818732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bb9ef2fda0564579bd1bc1e5364fc9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
