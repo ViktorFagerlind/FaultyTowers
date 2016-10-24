@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MoveObject : MonoBehaviour
+public class MoveObject : TouchBase
 {
   private Vector3 m_downOffset;
   private Rigidbody2D m_rigidBody;
@@ -12,41 +12,6 @@ public class MoveObject : MonoBehaviour
   void Start ()
   {
     m_rigidBody = this.GetComponent<Rigidbody2D> ();
-  }
-
-  // ------------------------------------------------------------------------------------------
-
-  bool GetTouch (out TouchPhase touch, out Vector2 touchPoint)
-  {
-    bool anyTouch;
-
-    touchPoint = new Vector2 ();
-    
-    if (Input.touchCount > 0) // Use real touch
-    {
-      touch = Input.GetTouch (0).phase;
-      touchPoint = Input.GetTouch (0).position;
-      return true;
-    }
-    else // Simulate touch with mouse
-    {
-      anyTouch = true;
-      if (Input.GetMouseButtonDown (0))
-        touch = TouchPhase.Began;
-      else if (Input.GetMouseButton (0))
-        touch = TouchPhase.Moved;
-      else if (Input.GetMouseButtonUp (0))
-        touch = TouchPhase.Ended;
-      else
-      {
-        anyTouch = false;
-        touch = TouchPhase.Stationary;
-      }
-
-      touchPoint = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
-    }
-
-    return anyTouch;
   }
 
   // ------------------------------------------------------------------------------------------
