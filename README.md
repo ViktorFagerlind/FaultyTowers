@@ -1,10 +1,10 @@
-# FaultyTowers
+## FaultyTowers
 
-## Målbild
+### Målbild
 
-## Version 0.1
+### Version 0.1
 
-## Kommande delfunktioner att implementera (TODO)
+### Kommande delfunktioner att implementera (TODO)
 
-## Implementerade delfunktioner (DONE)
+### Implementerade delfunktioner (DONE)
 
