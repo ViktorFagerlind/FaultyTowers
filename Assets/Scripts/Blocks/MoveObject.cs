@@ -18,20 +18,20 @@ public class MoveObject : TouchBase
 
   void Update ()
   {
-    TouchPhase  touch;
-    Vector2     touchPoint;
+    TouchProxy[] touches;
 
-    if (!GetTouch (out touch, out touchPoint))
+
+    if (!GetTouches (out touches))
       return;
 
-    switch (touch)
+    switch (touches[0].m_phase)
     {
       case TouchPhase.Began:
-        HandleGrab (touchPoint);
+        HandleGrab (touches[0].m_position);
         break;
 
       case TouchPhase.Moved:
-        HandleMove (touchPoint);
+        HandleMove (touches[0].m_position);
         break;
 
       case TouchPhase.Canceled:
