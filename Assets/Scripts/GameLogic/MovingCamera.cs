@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MovingCamera : TouchBase
+public class MovingCamera : MonoBehaviour
 {
 
   float m_unitsPerPixel;
@@ -18,12 +18,8 @@ public class MovingCamera : TouchBase
     //m_pixelsPerUnit = 1f / m_unitsPerPixel;
   }
 
-  void Update()
+  void HandleTouches (TouchProxy[] touches)
   {
-    TouchProxy[] touches;
-
-    GetTouches (out touches);
-
     if (touches.Length != 1)
       return;
 

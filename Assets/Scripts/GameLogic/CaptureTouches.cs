@@ -15,8 +15,12 @@ public class TouchProxy
   }
 }
 
-public class TouchBase : MonoBehaviour
+public delegate bool TouchDelegate (TouchProxy[] touches);
+
+public class CaptureTouches : MonoBehaviour
 {
+  [HideInInspector]
+  public static TouchDelegate m_touchDelegates = null;
 
   // ------------------------------------------------------------------------------------------
 
@@ -79,6 +83,30 @@ public class TouchBase : MonoBehaviour
 
     return true;
   }
+
+  // ------------------------------------------------------------------------------------------
+
+  void Update ()
+  {
+    TouchProxy[] touches;
+
+    if (!GetTouches (out touches))
+      return;
+
+    if (m_touchDelegates != null)
+    {
+      foreach (TouchDelegate d in m_touchDelegates.GetInvocationList ())
+      {
+        // Once the touch is handled, it should not be used by anyone else
+        if (d (touches))
+          return;
+      }
+    }
+
+    // If noone else wants the touch, send it to the camera
+    Camera.main.gameObject.SendMessage ("HandleTouches", touches);
+  }
+
 
   // ------------------------------------------------------------------------------------------
 
