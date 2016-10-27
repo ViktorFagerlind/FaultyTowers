@@ -11,7 +11,7 @@
 ### Version 0.2
 * Kunna skjuta på sitt egent torn
 
-### Kommande delfunktioner att implementera (TODO)
+### Arbetssätt
 * Experimentera i sin egen scen, modda bara de riktiga när riktiga saker implementeras
 
 ### Kommande delfunktioner att implementera (TODO)
