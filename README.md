@@ -11,7 +11,7 @@
 ### Version 0.2
 * Kunna skjuta på sitt egent torn
 
-### Kommande delfunktioner att implementera (TODO)
+### Arbetssätt
 * Experimentera i sin egen scen, modda bara de riktiga när riktiga saker implementeras
 
 ### Kommande delfunktioner att implementera (TODO)
@@ -19,6 +19,7 @@
 * Skapa ett stenobjekt motsv trälådan med egen GUI-knapp (Maria)
 * Distribution av input från spelare (Viktor)
 * Implementera flytt/zoom av kamera (Viktor)
+* Implementera paralax-scrollning
 * Riktig placering av objekt, drag från meny sedan "place"-knapp.
 * Några fler objekt att placera
 * Stöd för att objekt går sönder
