@@ -28,6 +28,8 @@ public class CaptureTouches : MonoBehaviour
 
   // ------------------------------------------------------------------------------------------
 
+  // Use real touches if available, otherwise simulate touches with mouse.
+  // Holding left control is used to simulate double finger touch
   protected bool GetTouches (out TouchProxy[] touches)
   {
     touches = null;
