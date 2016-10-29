@@ -4,17 +4,22 @@ using System.Collections;
 public class MovingCamera : MonoBehaviour
 {
 
+  public float m_zoomSpeed = 0.03f;
+
   float m_unitsPerPixel;
 
   int m_scrollTouchID = -1;
   Vector2 m_scrollTouchOrigin;
   Vector2 m_cameraOrigin;
+  Camera  m_camera;
 
   void Start ()
   {
     UpdateUnitsPerPixel ();
 
     DeviceChange.OnOrientationChange += OrientationChange;
+
+    m_camera = GetComponent<Camera> ();
   }
 
   void OrientationChange (DeviceOrientation orientation) 
@@ -57,23 +62,21 @@ public class MovingCamera : MonoBehaviour
 
   void PerformZoom (TouchProxy touchZero, TouchProxy touchOne)
   {
-    /*
     // Find the position in the previous frame of each touch.
-    Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
-    Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+    Vector2 touchZeroPrevPos = touchZero.m_position - touchZero.m_deltaPosition;
+    Vector2 touchOnePrevPos = touchOne.m_position - touchOne.m_deltaPosition;
 
     // Find the magnitude of the vector (the distance) between the touches in each frame.
     float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
-    float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+    float touchDeltaMag = (touchZero.m_position - touchOne.m_position).magnitude;
 
     // Find the difference in the distances between each frame.
     float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
     // ... change the orthographic size based on the change in distance between the touches.
-    camera.orthographicSize += deltaMagnitudeDiff * orthoZoomSpeed;
+    m_camera.orthographicSize += deltaMagnitudeDiff * m_zoomSpeed;
 
     // Make sure the orthographic size never drops below zero.
-    camera.orthographicSize = Mathf.Max (camera.orthographicSize, 0.1f);
-    */
+    m_camera.orthographicSize = Mathf.Max (m_camera.orthographicSize, 0.1f);
   }
 }

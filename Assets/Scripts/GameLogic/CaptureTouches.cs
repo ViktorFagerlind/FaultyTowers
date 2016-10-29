@@ -6,12 +6,14 @@ public class TouchProxy
   public Vector2      m_position;
   public TouchPhase   m_phase;
   public int          m_fingerId;
+  public Vector2      m_deltaPosition;
 
-  public TouchProxy (Vector2 position, TouchPhase phase, int fingerId)
+  public TouchProxy (Vector2 position, TouchPhase phase, int fingerId, Vector2 deltaPosition)
   {
-    m_position  = position;
-    m_phase     = phase;
-    m_fingerId  = fingerId;
+    m_position      = position;
+    m_phase         = phase;
+    m_fingerId      = fingerId;
+    m_deltaPosition = deltaPosition;
   }
 }
 
@@ -24,7 +26,8 @@ public class CaptureTouches : MonoBehaviour
 
   // ------------------------------------------------------------------------------------------
 
-  private TouchProxy m_savedTouch;
+  private Vector2 m_fakeSecondPosition;
+  private Vector2 m_previousMousePosition = new Vector2 (0,0);
 
   // ------------------------------------------------------------------------------------------
 
@@ -41,7 +44,7 @@ public class CaptureTouches : MonoBehaviour
       for (int i = 0; i < Input.touchCount; i++)
       {
         Touch t = Input.touches [i];
-        touches[i] = new TouchProxy (t.position, t.phase, t.fingerId);
+        touches[i] = new TouchProxy (t.position, t.phase, t.fingerId, t.deltaPosition);
       }
 
       return true;
@@ -70,18 +73,17 @@ public class CaptureTouches : MonoBehaviour
       touches = new TouchProxy[2];
 
       if (tf == TouchPhase.Began)
-      {
-        touches [1] = new TouchProxy (mousePosition, tf, 1);
-        m_savedTouch = touches [1];
-      } 
-      else
-        touches [1] = m_savedTouch;
+        m_fakeSecondPosition = mousePosition;
+
+      touches [1] = new TouchProxy (m_fakeSecondPosition, tf, 1, new Vector2 (0,0));
 
     }
     else
       touches = new TouchProxy[1];
     
-    touches[0] = new TouchProxy (mousePosition, tf, 0);  
+    touches[0] = new TouchProxy (mousePosition, tf, 0, mousePosition - m_previousMousePosition);
+
+    m_previousMousePosition = mousePosition;
 
     return true;
   }
