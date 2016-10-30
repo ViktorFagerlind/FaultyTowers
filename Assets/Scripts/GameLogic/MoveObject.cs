@@ -9,7 +9,7 @@ public class MoveObject : MonoBehaviour
 
   // ------------------------------------------------------------------------------------------
 
-  void Start ()
+  void Awake ()
   {
     m_rigidBody = this.GetComponent<Rigidbody2D> ();
 
@@ -36,7 +36,7 @@ public class MoveObject : MonoBehaviour
 
   // ------------------------------------------------------------------------------------------
 
-  bool HandleGrab (Vector2 screenPosition)
+  public bool HandleGrab (Vector2 screenPosition)
   {
     // Check if this object was hit    
     Ray ray = Camera.main.ScreenPointToRay (screenPosition);

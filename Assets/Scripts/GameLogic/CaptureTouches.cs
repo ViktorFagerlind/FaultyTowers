@@ -24,11 +24,19 @@ public class CaptureTouches : MonoBehaviour
   [HideInInspector]
   public static TouchDelegate m_touchDelegates = null;
 
+
+  // ------------------------------------------------------------------------------------------
+
+  public static TouchProxy[] currentTouches
+  {
+    get { return m_currentTouches; }
+  }
   // ------------------------------------------------------------------------------------------
 
   private Vector2 m_fakeSecondPosition;
   private Vector2 m_previousMousePosition = new Vector2 (0, 0);
 
+  private static TouchProxy[] m_currentTouches = new TouchProxy[0];
   // ------------------------------------------------------------------------------------------
 
   // Use real touches if available, otherwise simulate touches with mouse.
@@ -97,9 +105,7 @@ public class CaptureTouches : MonoBehaviour
 
   void Update ()
   {
-    TouchProxy[] touches;
-
-    if (!GetTouches (out touches))
+    if (!GetTouches (out m_currentTouches))
       return;
 
     if (m_touchDelegates != null)
@@ -107,13 +113,13 @@ public class CaptureTouches : MonoBehaviour
       foreach (TouchDelegate d in m_touchDelegates.GetInvocationList ())
       {
         // Once the touch is handled, it should not be used by anyone else
-        if (d (touches))
+        if (d (m_currentTouches))
           return;
       }
     }
 
-    // If noone else wants the touch, send it to the camera
-    Camera.main.gameObject.SendMessage ("HandleTouches", touches);
+    // If no one else wants the touch, send it to the camera
+    Camera.main.gameObject.SendMessage ("HandleTouches", m_currentTouches);
   }
 
 
