@@ -95,7 +95,7 @@ PlayerSettings:
     16:9: 1
     Others: 1
   bundleIdentifier: com.Company.ProductName
-  bundleVersion: 1.0
+  bundleVersion: 0.1
   preloadedAssets: []
   metroEnableIndependentInputSource: 0
   xboxOneDisableKinectGpuReservation: 0
@@ -120,7 +120,7 @@ PlayerSettings:
     serializedVersion: 2
     m_Bits: 238
   iPhoneSdkVersion: 988
-  iPhoneTargetOSVersion: 24
+  iPhoneTargetOSVersion: 38
   tvOSSdkVersion: 0
   tvOSTargetOSVersion: 900
   tvOSRequireExtendedGameController: 0
@@ -163,7 +163,7 @@ PlayerSettings:
   iOSLaunchScreeniPadCustomXibPath: 
   iOSDeviceRequirements: []
   iOSURLSchemes: []
-  appleDeveloperTeamID: 
+  appleDeveloperTeamID: Viktor Fagerlind
   AndroidTargetDevice: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
