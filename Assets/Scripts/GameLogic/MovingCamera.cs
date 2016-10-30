@@ -38,7 +38,7 @@ public class MovingCamera : MonoBehaviour
 
   void UpdateUnitsPerPixel ()
   {
-    m_unitsPerPixel = Vector3.Distance (Camera.main.ScreenToWorldPoint (Vector2.zero), Camera.main.ScreenToWorldPoint (Vector2.right));
+    m_unitsPerPixel = Vector3.Distance (Camera.main.ScreenToWorldPoint (new Vector3 (0,0,-Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint (new Vector3 (0,1,-Camera.main.transform.position.z)));
   }
 
   void HandleTouches (TouchProxy[] touches)
