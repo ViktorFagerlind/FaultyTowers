@@ -228,7 +228,6 @@ GameObject:
   - 81: {fileID: 81362106}
   - 114: {fileID: 81362111}
   - 114: {fileID: 81362112}
-  - 50: {fileID: 81362113}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -347,23 +346,6 @@ MonoBehaviour:
   m_damping: 0.1
   m_lowerLeft: {x: -10, y: 1.2}
   m_upperRight: {x: 10, y: 13}
---- !u!50 &81362113
-Rigidbody2D:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 81362105}
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
 --- !u!1 &107315937
 GameObject:
   m_ObjectHideFlags: 0
@@ -1191,8 +1173,8 @@ RectTransform:
   m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 960, y: 519.5}
-  m_SizeDelta: {x: 1920, y: 1039}
+  m_AnchoredPosition: {x: 649, y: 170.5}
+  m_SizeDelta: {x: 1298, y: 341}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &460519556
 MonoBehaviour:
