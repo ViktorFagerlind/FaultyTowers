@@ -26,8 +26,6 @@ public class MovingCamera : MonoBehaviour
 
     m_camera = GetComponent<Camera> ();
 
-    GetComponent<Rigidbody2D> ().gravityScale = 0f;
-
     UpdateUnitsPerPixel ();
   }
 
@@ -62,6 +60,9 @@ public class MovingCamera : MonoBehaviour
     }
   }
 
+  // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in Update
+  // here is that CaptureTouches' Update is run before this Update. This is a setting in the GUI.
+  // TODO: This solution is not beautiful and should be changed!
   void Update ()
   {
     if (transform.position.x > m_upperRight.x && m_speed.x > 0 ||
@@ -73,7 +74,6 @@ public class MovingCamera : MonoBehaviour
       m_speed.y = 0f;
 
     transform.position += m_speed;
-
     m_speed -= m_damping * m_speed;
   }
 

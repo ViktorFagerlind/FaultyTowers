@@ -43,9 +43,7 @@ public class CaptureTouches : MonoBehaviour
   // Holding left control is used to simulate double finger touch
   protected bool GetTouches (out TouchProxy[] touches)
   {
-    bool anySimulatedTouch = true;
-
-    touches = null;
+    touches = new TouchProxy[0];
 
     if (Input.touchCount > 0) // Use real touch
     {
@@ -61,6 +59,8 @@ public class CaptureTouches : MonoBehaviour
     }
 
 
+    bool anySimulatedTouch = true;
+
     // Simulate touch with mouse
     TouchPhase tf = TouchPhase.Stationary;
 
@@ -71,10 +71,7 @@ public class CaptureTouches : MonoBehaviour
     else if (Input.GetMouseButtonUp (0))
       tf = TouchPhase.Ended;
     else
-    {
-      touches = new TouchProxy[0];
       anySimulatedTouch = false;
-    }
 
     Vector2 mousePosition = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
 
