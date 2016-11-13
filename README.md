@@ -17,7 +17,6 @@
 ### Kommande delfunktioner att implementera (TODO)
 * Fatta nånting (Maria)
 * Skapa ett stenobjekt motsv trälådan med egen GUI-knapp (Maria)
-* Implementera paralax-scrollning
 * Riktig placering av objekt, drag från meny sedan "place"-knapp.
 * Några fler objekt att placera
 * Stöd för att objekt går sönder
@@ -26,3 +25,4 @@
 * Få upp minsta möjliga bana med ett objekt som kan skapas och flyttas (Viktor)
 * Distribution av input från spelare (Viktor)
 * Implementera flytt/zoom av kamera (Viktor)
+* Implementera parallax-scrollning (Viktor)

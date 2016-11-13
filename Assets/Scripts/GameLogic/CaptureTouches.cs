@@ -8,12 +8,12 @@ public class TouchProxy
   public int m_fingerId;
   public Vector2 m_deltaPosition;
 
-  public TouchProxy (Vector2 position, TouchPhase phase, int fingerId, Vector2 deltaPosition)
+  public TouchProxy (Vector2 position, TouchPhase phase, int fingerId)
   {
     m_position = position;
     m_phase = phase;
     m_fingerId = fingerId;
-    m_deltaPosition = deltaPosition;
+    m_deltaPosition = new Vector2 (0,0);
   }
 }
 
@@ -34,7 +34,7 @@ public class CaptureTouches : MonoBehaviour
   // ------------------------------------------------------------------------------------------
 
   private Vector2 m_fakeSecondPosition;
-  private Vector2 m_previousMousePosition = new Vector2 (0, 0);
+  private Vector2[] m_previousPosition = new Vector2[2]{new Vector2 (0, 0), new Vector2 (0, 0)};
 
   private static TouchProxy[] m_currentTouches = new TouchProxy[0];
   // ------------------------------------------------------------------------------------------
@@ -43,6 +43,8 @@ public class CaptureTouches : MonoBehaviour
   // Holding left control is used to simulate double finger touch
   protected bool GetTouches (out TouchProxy[] touches)
   {
+    bool anyTouch = true;
+
     touches = new TouchProxy[0];
 
     if (Input.touchCount > 0) // Use real touch
@@ -52,50 +54,58 @@ public class CaptureTouches : MonoBehaviour
       for (int i = 0; i < Input.touchCount; i++)
       {
         Touch t = Input.touches [i];
-        touches [i] = new TouchProxy (t.position, t.phase, t.fingerId, t.deltaPosition);
+        touches [i] = new TouchProxy (t.position, t.phase, t.fingerId);
       }
-
-      return true;
     }
-
-
-    bool anySimulatedTouch = true;
-
-    // Simulate touch with mouse
-    TouchPhase tf = TouchPhase.Stationary;
-
-    if (Input.GetMouseButtonDown (0))
-      tf = TouchPhase.Began;
-    else if (Input.GetMouseButton (0))
-      tf = TouchPhase.Moved;
-    else if (Input.GetMouseButtonUp (0))
-      tf = TouchPhase.Ended;
-    else
-      anySimulatedTouch = false;
-
-    Vector2 mousePosition = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
-
-    if (anySimulatedTouch)
+    else // Simulate touch with mouse (if any)
     {
-      if (Input.GetKey (KeyCode.LeftControl))
-      {
-        touches = new TouchProxy[2];
+      // Simulate touch with mouse
+      TouchPhase tf = TouchPhase.Stationary;
 
-        if (tf == TouchPhase.Began)
-          m_fakeSecondPosition = new Vector2 (mousePosition.x - 200, mousePosition.y);
-
-        touches [1] = new TouchProxy (m_fakeSecondPosition, tf, 1, new Vector2 (0, 0));
-
-      }
+      if (Input.GetMouseButtonDown (0))
+        tf = TouchPhase.Began;
+      else if (Input.GetMouseButton (0))
+        tf = TouchPhase.Moved;
+      else if (Input.GetMouseButtonUp (0))
+        tf = TouchPhase.Ended;
       else
-        touches = new TouchProxy[1];
+        anyTouch = false;
+
+      Vector2 mousePosition = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
+
+      if (anyTouch)
+      {
+        if (Input.GetKey (KeyCode.LeftControl))
+        {
+          touches = new TouchProxy[2];
+
+          if (tf == TouchPhase.Began)
+            m_fakeSecondPosition = new Vector2 (mousePosition.x - 200, mousePosition.y);
+
+          touches [1] = new TouchProxy (m_fakeSecondPosition, tf, 1);
+
+        }
+        else
+          touches = new TouchProxy[1];
       
-      touches [0] = new TouchProxy (mousePosition, tf, 0, mousePosition - m_previousMousePosition);
+        touches [0] = new TouchProxy (mousePosition, tf, 0);
+      }
     }
 
-    m_previousMousePosition = mousePosition;
+    // Calculate delta position (does not work properly for real toches and the mouse does not have one
+    for (int i = 0; i < touches.Length; i++)
+    {
+      TouchProxy t = touches [i];
 
-    return anySimulatedTouch;
+      if (t.m_phase == TouchPhase.Began)
+        t.m_deltaPosition = new Vector2 (0, 0);
+      else
+        t.m_deltaPosition = t.m_position - m_previousPosition [i];
+      
+      m_previousPosition [i] = t.m_position;
+    }
+
+    return anyTouch;
   }
 
   // ------------------------------------------------------------------------------------------

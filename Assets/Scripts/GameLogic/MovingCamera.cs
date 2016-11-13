@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 public class MovingCamera : MonoBehaviour
@@ -18,13 +19,22 @@ public class MovingCamera : MonoBehaviour
   int m_scrollTouchID = -1;
   Camera m_camera;
 
+  DebugTextHandle m_fpsHandle;
+  float[] m_fpss = new float[30] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  /*
+  DebugTextHandle m_debugTextHandleUpp;
+  DebugTextHandle m_debugTextHandleSpeed;
+  */
+
   void Start ()
   {
-    UpdateUnitsPerPixel ();
-
     DeviceChange.OnOrientationChange += OrientationChange;
 
     m_camera = GetComponent<Camera> ();
+
+    m_fpsHandle = DebugText.Instance.getDebugTextHandle ();
+    //m_debugTextHandleUpp = DebugText.Instance.getDebugTextHandle ();
+    //m_debugTextHandleSpeed = DebugText.Instance.getDebugTextHandle ();
 
     UpdateUnitsPerPixel ();
   }
@@ -36,7 +46,9 @@ public class MovingCamera : MonoBehaviour
 
   void UpdateUnitsPerPixel ()
   {
-    m_unitsPerPixel = Vector3.Distance (Camera.main.ScreenToWorldPoint (new Vector3 (0,0,-Camera.main.transform.position.z)), Camera.main.ScreenToWorldPoint (new Vector3 (0,1,-Camera.main.transform.position.z)));
+    m_unitsPerPixel = Vector3.Distance (m_camera.ScreenToWorldPoint (new Vector3 (0,0,-Camera.main.transform.position.z)), 
+                                        m_camera.ScreenToWorldPoint (new Vector3 (0,1,-Camera.main.transform.position.z)));
+    //m_debugTextHandleUpp.text = "m_unitsPerPixel: " + m_unitsPerPixel.ToString ();
   }
 
   void HandleTouches (TouchProxy[] touches)
@@ -75,6 +87,17 @@ public class MovingCamera : MonoBehaviour
 
     transform.position += m_speed;
     m_speed -= m_damping * m_speed;
+
+
+    {
+      Array.Copy (m_fpss, 1, m_fpss, 0, m_fpss.Length - 1);
+      m_fpss[m_fpss.Length-1] = 1f / (Time.deltaTime);
+      float fpsSum = 0f;
+      Array.ForEach(m_fpss, fps_e => fpsSum += fps_e);
+
+      Array.Copy (m_fpss, 1, m_fpss, 0, m_fpss.Length - 1);
+      m_fpsHandle.text = "FPS: " + (1f / (Time.deltaTime)).ToString ("N0") + "\n Avg FPS: " + (fpsSum/(float)m_fpss.Length).ToString ("N0");
+    }
   }
 
   void PerformZoom (TouchProxy touchZero, TouchProxy touchOne)
