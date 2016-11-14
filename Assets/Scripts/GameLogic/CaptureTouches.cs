@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TouchProxy
 {
@@ -39,7 +40,9 @@ public class CaptureTouches : MonoBehaviour
   // ------------------------------------------------------------------------------------------
 
   private Vector2 m_fakeSecondPosition;
-  private Vector2[] m_previousPosition = new Vector2[2]{ new Vector2 (0, 0), new Vector2 (0, 0) };
+
+  Dictionary<int, FixedSizedVector2Queue> id2positionAverage = new Dictionary<int, FixedSizedVector2Queue> ();
+  Dictionary<int, Vector2> id2previousPosition = new Dictionary<int, Vector2> ();
 
   private static TouchProxy[] m_currentTouches = new TouchProxy[0];
   // ------------------------------------------------------------------------------------------
@@ -49,28 +52,32 @@ public class CaptureTouches : MonoBehaviour
     m_fpsTouchHandle = DebugText.Instance.getDebugTextHandle ();
   }
 
-  // Use real touches if available, otherwise simulate touches with mouse.
-  // Holding left control is used to simulate double finger touch
-  protected bool GetTouches (out TouchProxy[] touches)
+  protected bool GetRealTouches (out TouchProxy[] touches)
   {
-    if (Input.touchCount > 0) // Use real touches if any
-    {
-      touches = new TouchProxy[Input.touchCount];
-      
-      for (int i = 0; i < Input.touchCount; i++)
-      {
-        Touch t = Input.touches [i];
-        touches [i] = new TouchProxy (t.position, t.phase, t.fingerId, t.deltaPosition);
+    touches = null;
 
-        if (i == 0)
-          m_fpsTouchHandle.text = "Touch FPS: " + (1f / t.deltaTime).ToString ("N0");
-      }
-      return true;
+    if (Input.touchCount == 0)
+      return false;
+    
+    touches = new TouchProxy[Input.touchCount];
+
+    for (int i = 0; i < Input.touchCount; i++)
+    {
+      Touch t = Input.touches [i];
+      touches [i] = new TouchProxy (t.position, t.phase, t.fingerId);
+
+      if (i == 0)
+        m_fpsTouchHandle.text = "Touch FPS: " + (1f / t.deltaTime).ToString ("N0");
     }
 
-    // Simulate touch with mouse (if any)
-    touches = new TouchProxy[0];
+    return true;
+  }
 
+  protected bool GetFakeTouches (out TouchProxy[] touches)
+  {
+    touches = null;
+
+    // Simulate touch with mouse (if any)
     TouchPhase tf = TouchPhase.Stationary;
 
     if (Input.GetMouseButtonDown (0))
@@ -96,23 +103,49 @@ public class CaptureTouches : MonoBehaviour
     }
     else
       touches = new TouchProxy[1];
-      
+
     touches [0] = new TouchProxy (mousePosition, tf, 0);
 
-    // Calculate delta position
-    for (int i = 0; i < touches.Length; i++)
-    {
-      TouchProxy t = touches [i];
+    return true;
+  }
 
-      if (t.m_phase == TouchPhase.Began)
-        t.m_deltaPosition = new Vector2 (0, 0);
-      else
-        t.m_deltaPosition = t.m_position - m_previousPosition [i];
-      
-      m_previousPosition [i] = t.m_position;
+  // Use real touches if available, otherwise simulate touches with mouse.
+  // Holding left control is used to simulate double finger touch
+  protected bool GetTouches (out TouchProxy[] touches)
+  {
+    bool AnyTouch = GetRealTouches (out touches);
+
+    if (!AnyTouch)
+      AnyTouch = GetFakeTouches (out touches);
+
+    if (AnyTouch)
+    {
+      // Average the positions (due to unity bug making touches update at another rate than frames)
+      // Also calculate the delta position that correspond to this.
+      for (int i = 0; i < touches.Length; i++)
+      {
+        TouchProxy t = touches [i];
+
+        if (t.m_phase == TouchPhase.Began)
+        {
+          id2positionAverage [t.m_fingerId] = new FixedSizedVector2Queue (3);
+          id2positionAverage [t.m_fingerId].Enqueue (t.m_position);
+
+          id2previousPosition [t.m_fingerId] = t.m_position;
+          t.m_deltaPosition = new Vector2 (0, 0);
+        }
+        else
+        {
+          id2positionAverage [t.m_fingerId].Enqueue (t.m_position);
+          t.m_position = id2positionAverage [t.m_fingerId].Average ();
+
+          t.m_deltaPosition = t.m_position - id2previousPosition [t.m_fingerId];
+          id2previousPosition [t.m_fingerId] = t.m_position;
+        }
+      }
     }
 
-    return true;
+    return AnyTouch;
   }
 
   // ------------------------------------------------------------------------------------------

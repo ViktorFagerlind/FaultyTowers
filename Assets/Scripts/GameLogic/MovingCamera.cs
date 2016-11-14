@@ -46,24 +46,18 @@ public class MovingCamera : MonoBehaviour
 
   void PerformPan (TouchProxy touch)
   {
-    float unitsPerPixel = m_camera.orthographicSize/((float)Screen.height/2f);
+    Vector3 worldTouchPosition = m_camera.ScreenToWorldPoint (new Vector3 (touch.m_position.x, touch.m_position.y, -m_camera.transform.position.z));
 
     //Note down the touch ID and position when the touch begins...
     if (touch.m_phase == TouchPhase.Began)
     {
       m_scrollTouchID = touch.m_fingerId;
 
-      m_panStartPosition = m_camera.ScreenToWorldPoint (new Vector3 (touch.m_position.x, touch.m_position.y, -m_camera.transform.position.z));
+      m_panStartPosition = worldTouchPosition;
     }
     else if (touch.m_fingerId == m_scrollTouchID)
     {
-      Vector2 distance = unitsPerPixel * touch.m_deltaPosition;
-
-      m_speed = -new Vector3 (distance.x, distance.y, 0f);
-
-      Vector3 panCurrentPosition = m_camera.ScreenToWorldPoint (new Vector3 (touch.m_position.x, touch.m_position.y, -m_camera.transform.position.z));
-
-      m_speed = -(panCurrentPosition - m_panStartPosition);
+      m_speed = -(worldTouchPosition - m_panStartPosition);
 
       m_speedAverageQueue.Enqueue (m_speed);
     }
@@ -116,11 +110,12 @@ public class MovingCamera : MonoBehaviour
   {
     m_speed = m_speedAverageQueue.Average ();
     m_speedAverageQueue.Clear ();
+
+    m_scrollTouchID = -1; // Reset scroll id to make sure that one of the zoom touches are not mistaken for an ongoing pan
   }
 
-  // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in Update
-  // here is that CaptureTouches' Update is run before this Update. This is a setting in the GUI.
-  // TODO: This solution is not beautiful and should be changed!
+  // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in LateUpdate
+  // here is that CaptureTouches' Update is run before LateUpdate. This may not be super intuitive and nice...
   void LateUpdate ()
   {
     HandleState ();
