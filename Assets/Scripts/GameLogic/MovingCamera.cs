@@ -4,6 +4,12 @@ using System.Collections;
 
 public class MovingCamera : MonoBehaviour
 {
+  public enum State
+  {
+    Panning,
+    Zooming,
+    None
+  }
 
   public float    m_minSize = 3f;
   public float    m_maxSize = 10f;
@@ -12,43 +18,22 @@ public class MovingCamera : MonoBehaviour
   public Vector2  m_lowerLeft  = new Vector2 (-10,-10);
   public Vector2  m_upperRight = new Vector2 (10,10);
 
-  Vector3      m_speed = new Vector3 (0f,0f,0f);
+  Vector3         m_panStartPosition;
 
-  float m_unitsPerPixel;
+  Vector3         m_speed = new Vector3 (0f,0f,0f);
 
-  int m_scrollTouchID = -1;
-  Camera m_camera;
+  int             m_scrollTouchID = -1;
+  Camera          m_camera;
 
-  DebugTextHandle m_fpsHandle;
-  float[] m_fpss = new float[30] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  /*
-  DebugTextHandle m_debugTextHandleUpp;
-  DebugTextHandle m_debugTextHandleSpeed;
-  */
+  State           m_state = State.None;
+  bool            m_panPerformed=false;
+  bool            m_zoomPerformed=false;
+
+  FixedSizedVector2Queue m_speedAverageQueue = new FixedSizedVector2Queue (6);
 
   void Start ()
   {
-    DeviceChange.OnOrientationChange += OrientationChange;
-
     m_camera = GetComponent<Camera> ();
-
-    m_fpsHandle = DebugText.Instance.getDebugTextHandle ();
-    //m_debugTextHandleUpp = DebugText.Instance.getDebugTextHandle ();
-    //m_debugTextHandleSpeed = DebugText.Instance.getDebugTextHandle ();
-
-    UpdateUnitsPerPixel ();
-  }
-
-  void OrientationChange (DeviceOrientation orientation)
-  {
-    UpdateUnitsPerPixel ();
-  }
-
-  void UpdateUnitsPerPixel ()
-  {
-    m_unitsPerPixel = Vector3.Distance (m_camera.ScreenToWorldPoint (new Vector3 (0,0,-Camera.main.transform.position.z)), 
-                                        m_camera.ScreenToWorldPoint (new Vector3 (0,1,-Camera.main.transform.position.z)));
-    //m_debugTextHandleUpp.text = "m_unitsPerPixel: " + m_unitsPerPixel.ToString ();
   }
 
   void HandleTouches (TouchProxy[] touches)
@@ -61,43 +46,29 @@ public class MovingCamera : MonoBehaviour
 
   void PerformPan (TouchProxy touch)
   {
+    float unitsPerPixel = m_camera.orthographicSize/((float)Screen.height/2f);
+
     //Note down the touch ID and position when the touch begins...
     if (touch.m_phase == TouchPhase.Began)
-      m_scrollTouchID = touch.m_fingerId;
-    else if (touch.m_phase == TouchPhase.Moved && touch.m_fingerId == m_scrollTouchID)
     {
-      Vector2 distance = m_unitsPerPixel * touch.m_deltaPosition;
+      m_scrollTouchID = touch.m_fingerId;
+
+      m_panStartPosition = m_camera.ScreenToWorldPoint (new Vector3 (touch.m_position.x, touch.m_position.y, -m_camera.transform.position.z));
+    }
+    else if (touch.m_fingerId == m_scrollTouchID)
+    {
+      Vector2 distance = unitsPerPixel * touch.m_deltaPosition;
 
       m_speed = -new Vector3 (distance.x, distance.y, 0f);
+
+      Vector3 panCurrentPosition = m_camera.ScreenToWorldPoint (new Vector3 (touch.m_position.x, touch.m_position.y, -m_camera.transform.position.z));
+
+      m_speed = -(panCurrentPosition - m_panStartPosition);
+
+      m_speedAverageQueue.Enqueue (m_speed);
     }
-  }
 
-  // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in Update
-  // here is that CaptureTouches' Update is run before this Update. This is a setting in the GUI.
-  // TODO: This solution is not beautiful and should be changed!
-  void Update ()
-  {
-    if (transform.position.x > m_upperRight.x && m_speed.x > 0 ||
-      transform.position.x < m_lowerLeft.x && m_speed.x < 0)
-      m_speed.x = 0f;
-    
-    if (transform.position.y > m_upperRight.y && m_speed.y > 0 ||
-      transform.position.y < m_lowerLeft.y && m_speed.y < 0)
-      m_speed.y = 0f;
-
-    transform.position += m_speed;
-    m_speed -= m_damping * m_speed;
-
-
-    {
-      Array.Copy (m_fpss, 1, m_fpss, 0, m_fpss.Length - 1);
-      m_fpss[m_fpss.Length-1] = 1f / (Time.deltaTime);
-      float fpsSum = 0f;
-      Array.ForEach(m_fpss, fps_e => fpsSum += fps_e);
-
-      Array.Copy (m_fpss, 1, m_fpss, 0, m_fpss.Length - 1);
-      m_fpsHandle.text = "FPS: " + (1f / (Time.deltaTime)).ToString ("N0") + "\n Avg FPS: " + (fpsSum/(float)m_fpss.Length).ToString ("N0");
-    }
+    m_panPerformed=true;
   }
 
   void PerformZoom (TouchProxy touchZero, TouchProxy touchOne)
@@ -120,6 +91,48 @@ public class MovingCamera : MonoBehaviour
     m_camera.orthographicSize = Mathf.Max (m_camera.orthographicSize, m_minSize);
     m_camera.orthographicSize = Mathf.Min (m_camera.orthographicSize, m_maxSize);
 
-    UpdateUnitsPerPixel ();
+    m_zoomPerformed=true;
+  }
+
+  void HandleState ()
+  {
+    State newState = State.None;
+    if (m_panPerformed)
+      newState = State.Panning;
+    else if (m_zoomPerformed)
+      newState = State.Zooming;
+
+    if (m_state == State.Panning)
+      if (newState != State.Panning)
+        OnExitPanning ();
+
+    m_state = newState;
+
+    m_panPerformed=false;
+    m_zoomPerformed=false;
+  }
+
+  void OnExitPanning ()
+  {
+    m_speed = m_speedAverageQueue.Average ();
+  }
+
+  // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in Update
+  // here is that CaptureTouches' Update is run before this Update. This is a setting in the GUI.
+  // TODO: This solution is not beautiful and should be changed!
+  void LateUpdate ()
+  {
+    HandleState ();
+
+    if (transform.position.x > m_upperRight.x && m_speed.x > 0 ||
+      transform.position.x < m_lowerLeft.x && m_speed.x < 0)
+      m_speed.x = 0f;
+    
+    if (transform.position.y > m_upperRight.y && m_speed.y > 0 ||
+      transform.position.y < m_lowerLeft.y && m_speed.y < 0)
+      m_speed.y = 0f;
+
+    transform.position += m_speed;
+    m_speed -= m_damping * m_speed;
   }
 }

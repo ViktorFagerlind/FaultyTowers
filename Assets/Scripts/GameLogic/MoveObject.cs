@@ -7,6 +7,8 @@ public class MoveObject : MonoBehaviour
   private Rigidbody2D m_rigidBody;
   private bool m_ongoingTouch = false;
 
+  private Camera m_camera;
+
   // ------------------------------------------------------------------------------------------
 
   void Awake ()
@@ -14,6 +16,8 @@ public class MoveObject : MonoBehaviour
     m_rigidBody = this.GetComponent<Rigidbody2D> ();
 
     CaptureTouches.m_touchDelegates += HandleTouches;
+
+    m_camera = Camera.main;
   }
 
   // ------------------------------------------------------------------------------------------
@@ -44,7 +48,7 @@ public class MoveObject : MonoBehaviour
     if (!hit || hit.transform != this.transform)
       return false;
 
-    m_downOffset = transform.position - Camera.main.ScreenToWorldPoint (new Vector3 (screenPosition.x, screenPosition.y, -Camera.main.transform.position.z));
+    m_downOffset = transform.position - m_camera.ScreenToWorldPoint (new Vector3 (screenPosition.x, screenPosition.y, -m_camera.transform.position.z));
 
     Cursor.visible = false;
     m_rigidBody.isKinematic = true;
@@ -60,7 +64,7 @@ public class MoveObject : MonoBehaviour
     if (!m_ongoingTouch)
       return false;
 
-    Vector3 currentPosition = Camera.main.ScreenToWorldPoint (new Vector3 (screenPosition.x, screenPosition.y, -Camera.main.transform.position.z));
+    Vector3 currentPosition = m_camera.ScreenToWorldPoint (new Vector3 (screenPosition.x, screenPosition.y, -m_camera.transform.position.z));
 
     transform.position = currentPosition + m_downOffset;
 
