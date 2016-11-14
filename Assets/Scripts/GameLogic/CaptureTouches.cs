@@ -28,6 +28,8 @@ public class CaptureTouches : MonoBehaviour
   [HideInInspector]
   public static TouchDelegate m_touchDelegates = null;
 
+  DebugTextHandle m_fpsTouchHandle;
+
 
   // ------------------------------------------------------------------------------------------
 
@@ -42,6 +44,11 @@ public class CaptureTouches : MonoBehaviour
   private static TouchProxy[] m_currentTouches = new TouchProxy[0];
   // ------------------------------------------------------------------------------------------
 
+  void Start ()
+  {
+    m_fpsTouchHandle = DebugText.Instance.getDebugTextHandle ();
+  }
+
   // Use real touches if available, otherwise simulate touches with mouse.
   // Holding left control is used to simulate double finger touch
   protected bool GetTouches (out TouchProxy[] touches)
@@ -54,6 +61,9 @@ public class CaptureTouches : MonoBehaviour
       {
         Touch t = Input.touches [i];
         touches [i] = new TouchProxy (t.position, t.phase, t.fingerId, t.deltaPosition);
+
+        if (i == 0)
+          m_fpsTouchHandle.text = "Touch FPS: " + (1f / t.deltaTime).ToString ("N0");
       }
       return true;
     }

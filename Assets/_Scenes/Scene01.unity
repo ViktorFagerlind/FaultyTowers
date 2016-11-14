@@ -652,7 +652,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_minSize: 2
   m_maxSize: 10
-  m_zoomSpeed: 0.005
+  m_zoomSpeed: 0.01
   m_damping: 0.1
   m_lowerLeft: {x: -10, y: 2}
   m_upperRight: {x: 10, y: 5}

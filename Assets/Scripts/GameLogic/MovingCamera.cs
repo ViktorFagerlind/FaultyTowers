@@ -115,6 +115,7 @@ public class MovingCamera : MonoBehaviour
   void OnExitPanning ()
   {
     m_speed = m_speedAverageQueue.Average ();
+    m_speedAverageQueue.Clear ();
   }
 
   // The only reason it works with setting the speed in PerformPan (comes from CaptureTouches' Update) and then using it in Update

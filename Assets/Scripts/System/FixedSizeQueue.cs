@@ -18,6 +18,10 @@ public class FixedSizedQueue<T>
     return q.Peek ();
   }
 
+  public void Clear ()
+  {
+    q.Clear ();
+  }
 
   public void Enqueue(T obj)
   {
@@ -45,7 +49,7 @@ public class FixedSizedFloatQueue : FixedSizedQueue<float>
       sum += f;
     }
 
-    return sum / q.Count;
+    return q.Count == 0 ? 0f : sum / q.Count;
   }
 }
 
@@ -64,6 +68,6 @@ public class FixedSizedVector2Queue : FixedSizedQueue<Vector2>
       sum += v;
     }
 
-    return sum / q.Count;
+    return q.Count == 0 ? new Vector2 (0f,0f) : sum / q.Count;
   }
 }
