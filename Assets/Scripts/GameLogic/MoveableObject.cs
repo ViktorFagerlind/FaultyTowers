@@ -1,18 +1,33 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MoveObject : MonoBehaviour
+[RequireComponent (typeof (Rigidbody2D))]
+
+public class MoveableObject : MonoBehaviour
 {
   private Vector3 m_downOffset;
   private Rigidbody2D m_rigidBody;
-  private bool m_ongoingTouch = false;
+  protected bool m_ongoingMove = false;
 
   private Camera m_camera;
 
+  protected bool MoveAllowed {set; get;}
+
+
   // ------------------------------------------------------------------------------------------
 
-  void Awake ()
+  protected virtual void OnGrabbed () {}
+
+  protected virtual void OnMoved () {}
+
+  protected virtual void OnDropped () {}
+
+  // ------------------------------------------------------------------------------------------
+
+  protected virtual void Awake ()
   {
+    MoveAllowed = true;
+
     m_rigidBody = this.GetComponent<Rigidbody2D> ();
 
     CaptureTouches.m_touchDelegates += HandleTouches;
@@ -24,6 +39,12 @@ public class MoveObject : MonoBehaviour
 
   bool HandleTouches (TouchProxy[] touches)
   {
+    if (!MoveAllowed)
+      return false;
+
+    if (touches.Length != 1)
+      return false;
+
     switch (touches[0].m_phase)
     {
       case TouchPhase.Began:
@@ -52,7 +73,9 @@ public class MoveObject : MonoBehaviour
 
     Cursor.visible = false;
     m_rigidBody.isKinematic = true;
-    m_ongoingTouch = true;
+    m_ongoingMove = true;
+
+    OnGrabbed ();
 
     return true;
   }
@@ -61,12 +84,14 @@ public class MoveObject : MonoBehaviour
 
   bool HandleMove (Vector2 screenPosition)
   {
-    if (!m_ongoingTouch)
+    if (!m_ongoingMove)
       return false;
 
     Vector3 currentPosition = m_camera.ScreenToWorldPoint (new Vector3 (screenPosition.x, screenPosition.y, -m_camera.transform.position.z));
 
     transform.position = currentPosition + m_downOffset;
+
+    OnMoved ();
 
     return true;
   }
@@ -75,12 +100,14 @@ public class MoveObject : MonoBehaviour
 
   bool HandleDrop ()
   {
-    if (!m_ongoingTouch)
+    if (!m_ongoingMove)
       return false;
 
     Cursor.visible = true;
     m_rigidBody.isKinematic = false;
-    m_ongoingTouch = false;
+    m_ongoingMove = false;
+
+    OnDropped ();
 
     return true;
   }

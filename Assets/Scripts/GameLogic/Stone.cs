@@ -3,123 +3,111 @@ using System.Collections;
 
 
 [RequireComponent (typeof (CircleCollider2D))]
-[RequireComponent (typeof (SpringJoint2D))]
-public class Stone : MonoBehaviour
+
+public class Stone : MoveableObject
 {
 
-  public float stretchLimit = 1.0f;
-  public LineRenderer stringBack;
-  public LineRenderer stringFront;
+  public float m_stretchLimit = 1f;
+  public LineRenderer m_bandBack;
+  public LineRenderer m_bandFront;
 
-  private SpringJoint2D spring;
-  private bool clicked;
-  private Transform slingshot;
-  private Ray mouseRay;
-  private Ray leftRay;
-  private float stretchSquare;
-  private float radius;
-  private Vector2 velocityX;
+  private float m_stretchSquare = 1.0f;
+  private SpringJoint2D m_spring;
+  private Transform m_slingshot;
+  private Ray m_slingshotToStoneRay;
+  private Ray m_aroundStoneRay;
+  private float m_radius;
+  private Vector2 m_velocityX;
 
-  void Awake()
+  override protected void Awake()
   {
-    /*
-    spring = GetComponent<SpringJoint2D> ();
-    slingshot = spring.connectedBody.transform;
-    */
+    base.Awake ();
+
+    m_stretchSquare = m_stretchLimit * m_stretchLimit;
+    m_spring = GetComponent<SpringJoint2D> ();
+    m_slingshot = m_spring.connectedBody.transform;
   }
 
   void Start()
   {
     StringSetup ();
 
-//    mouseRay = new Ray (slingshot.position, Vector3.zero);
-    leftRay = new Ray (stringFront.transform.position, Vector3.zero);
-//    stretchSquare = stretchLimit * stretchLimit;
+    m_slingshotToStoneRay = new Ray (m_slingshot.position, Vector3.zero);
+    m_aroundStoneRay = new Ray (m_bandFront.transform.position, Vector3.zero);
 
     CircleCollider2D circleColl = GetComponent<CircleCollider2D> ();
-    radius = circleColl.radius;
+    m_radius = circleColl.radius;
   }
 
-  void Update()
+  // ------------------------------------------------------------------------------------------
+
+  void LateUpdate()
   {
     StringUpdate ();
-    /*
-    if (clicked)
-      Dragging ();
 
-    if (spring != null)
+    if (m_spring != null)
     {
-      if (!rigidbody2D.isKinematic && velocityX.sqrMagnitude > rigidbody2D.velocity.sqrMagnitude)
+      if (!GetComponent<Rigidbody2D>().isKinematic && m_velocityX.sqrMagnitude > GetComponent<Rigidbody2D>().velocity.sqrMagnitude)
       {
-        Destroy (spring);
-        rigidbody2D.velocity = velocityX;
+        Destroy (m_spring);
+        GetComponent<Rigidbody2D>().velocity = m_velocityX;
       }
 
-      if (!clicked)
-        velocityX = rigidbody2D.velocity;
+      if (!m_ongoingMove)
+        m_velocityX = GetComponent<Rigidbody2D>().velocity;
 
       StringUpdate ();
 
     }
     else
     {
-      stringBack.enabled = false;
-      stringFront.enabled = false;
+      m_bandBack.enabled = false;
+      m_bandFront.enabled = false;
     }
-    */
   }
 
   void StringSetup()
   {
-    stringBack.SetPosition (0, stringBack.transform.position);
-    stringFront.SetPosition (0, stringFront.transform.position);
-    stringBack.sortingOrder = 1;
-    stringFront.sortingOrder = 3;
-    stringBack.sortingLayerName = "Default";
-    stringFront.sortingLayerName = "Default";
+    m_bandBack.SetPosition (0, m_bandBack.transform.position);
+    m_bandFront.SetPosition (0, m_bandFront.transform.position);
+    m_bandBack.sortingOrder = 1;
+    m_bandFront.sortingOrder = 3;
+    m_bandBack.sortingLayerName = "Default";
+    m_bandFront.sortingLayerName = "Default";
   }
 
-  void OnMouseDown()
+  override protected void OnGrabbed ()
   {
-    /*
-    spring.enabled = false;
-    clicked = true;
-    */
+    m_spring.enabled = false;
   }
 
-  void OnMouseUp()
+  override protected void OnDropped ()
   {
-    /*
-    spring.enabled = true;
-    rigidbody2D.isKinematic = false;
-    clicked = false;
-    */
+    m_spring.enabled = true;
+    GetComponent<Rigidbody2D>().isKinematic = false;
   }
 
-  void Dragging()
+  override protected void OnMoved ()
   {
-    /*
-    Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-    Vector2 fromSlingshot = mousePos - slingshot.position;
+    Vector2 slingshotToObjectDirection = transform.position - m_slingshot.position;
+    Vector3 newPosition = new Vector3 (transform.position.x, transform.position.y, transform.position.z);
 
-    if (fromSlingshot.sqrMagnitude > stretchSquare)
+    if (slingshotToObjectDirection.sqrMagnitude > m_stretchSquare)
     {
-      mouseRay.direction = fromSlingshot;
-      mousePos = mouseRay.GetPoint (stretchLimit);
+      m_slingshotToStoneRay.direction = slingshotToObjectDirection;
+      newPosition = m_slingshotToStoneRay.GetPoint (m_stretchLimit);
     }
 
-    mousePos.z = 0f;
-    transform.position = mousePos;
-    */
+    transform.position = newPosition;
   }
 
   void StringUpdate()
   {
-    Vector2 bandToStone = transform.position - stringFront.transform.position;
-    leftRay.direction = bandToStone;
+    Vector2 bandToStone = transform.position - m_bandFront.transform.position;
+    m_aroundStoneRay.direction = bandToStone;
 
-    Vector3 hold = leftRay.GetPoint (bandToStone.magnitude + radius);
-    stringBack.SetPosition (1, hold);
-    stringFront.SetPosition (1, hold);
+    Vector3 hold = m_aroundStoneRay.GetPoint (bandToStone.magnitude + m_radius);
+    m_bandBack.SetPosition (1, hold);
+    m_bandFront.SetPosition (1, hold);
   }
 }

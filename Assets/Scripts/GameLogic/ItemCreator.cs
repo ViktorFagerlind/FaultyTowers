@@ -22,14 +22,14 @@ public class ItemCreator : MonoBehaviour
 
     TouchProxy[] touches = CaptureTouches.currentTouches;
 
-    if (touches.Length > 0)
+    if (touches != null && touches.Length > 0)
     {
       Vector3 position = Camera.main.ScreenToWorldPoint (new Vector3 (touches [0].m_position.x, touches [0].m_position.y, -Camera.main.transform.position.z));
 
       Transform newObject = Instantiate (m_objectToCreateOnUpdate, position, Quaternion.identity) as Transform;
 
       // TODO: Maybe not the most beautiful solution, should be handled in a better way...
-      newObject.gameObject.GetComponent<MoveObject> ().HandleGrab (touches [0].m_position);
+      newObject.gameObject.GetComponent<MoveableObject> ().HandleGrab (touches [0].m_position);
 
       m_objectToCreateOnUpdate = null;
     }
