@@ -6,10 +6,10 @@ using System.Collections;
 public class MoveableObject : MonoBehaviour
 {
   private Vector3 m_downOffset;
-  private Rigidbody2D m_rigidBody;
-  protected bool m_ongoingMove = false;
-
   private Camera m_camera;
+  protected Rigidbody2D m_rigidBody;
+
+  protected bool m_ongoingMove = false;
 
   protected bool MoveAllowed {set; get;}
 
@@ -33,6 +33,13 @@ public class MoveableObject : MonoBehaviour
     CaptureTouches.m_touchDelegates += HandleTouches;
 
     m_camera = Camera.main;
+  }
+
+  // ------------------------------------------------------------------------------------------
+
+  protected virtual void OnDestroy ()
+  {
+    CaptureTouches.m_touchDelegates -= HandleTouches;
   }
 
   // ------------------------------------------------------------------------------------------
